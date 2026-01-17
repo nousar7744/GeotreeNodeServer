@@ -1,0 +1,606 @@
+{
+  "info": {
+    "name": "GeoTree API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000/api"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "API Health",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/health"
+          }
+        },
+        {
+          "name": "Test Route",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/test"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Check Number",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile\": \"9999999999\"\n}"
+            },
+            "url": "{{base_url}}/auth/check-number"
+          }
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile\": \"9999999999\",\n  \"otp\": \"1234\"\n}"
+            },
+            "url": "{{base_url}}/auth/verify-otp"
+          }
+        },
+        {
+          "name": "PhonePe Create Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100,\n  \"user_id\": \"\",\n  \"mobile\": \"\"\n}"
+            },
+            "url": "{{base_url}}/auth/phonepe/create-payment"
+          }
+        },
+        {
+          "name": "PhonePe Create Payment (Old)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100,\n  \"user_id\": \"\",\n  \"mobile\": \"\"\n}"
+            },
+            "url": "{{base_url}}/phonepe/create-payment"
+          }
+        },
+        {
+          "name": "PhonePe Redirect",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/phonepe/redirect"
+          }
+        },
+        {
+          "name": "PhonePe Callback",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/phonepe/callback"
+          }
+        }
+      ]
+    },
+    {
+      "name": "State",
+      "item": [
+        {
+          "name": "State List",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/state/list"
+          }
+        },
+        {
+          "name": "Add State",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "state_name", "value": "", "type": "text" },
+                { "key": "image", "type": "file" }
+              ]
+            },
+            "url": "{{base_url}}/state/add"
+          }
+        },
+        {
+          "name": "Update State",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"state_name\": \"\"\n}"
+            },
+            "url": "{{base_url}}/state/update/:state_id"
+          }
+        },
+        {
+          "name": "Upload State Image",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "state_id", "value": "", "type": "text" },
+                { "key": "image", "type": "file" }
+              ]
+            },
+            "url": "{{base_url}}/state/upload-image"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Category",
+      "item": [
+        {
+          "name": "Category List",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/category/list"
+          }
+        },
+        {
+          "name": "Add Category",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "category_name", "value": "", "type": "text" },
+                { "key": "image", "type": "file" }
+              ]
+            },
+            "url": "{{base_url}}/category/add"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Carbon",
+      "item": [
+        {
+          "name": "Home Type List",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/carbon/home-type-list"
+          }
+        },
+        {
+          "name": "Transport Type List",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/carbon/transport-type-list"
+          }
+        },
+        {
+          "name": "Electricity List",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/carbon/electricity-list"
+          }
+        },
+        {
+          "name": "Food Type List",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/carbon/food-type-list"
+          }
+        },
+        {
+          "name": "Add All Types",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": "{{base_url}}/carbon/add-all-types"
+          }
+        },
+        {
+          "name": "Submit Carbon",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"\",\n  \"home_type\": \"\",\n  \"transport_type\": \"\",\n  \"electricity_type\": \"\",\n  \"food_type\": \"\"\n}"
+            },
+            "url": "{{base_url}}/carbon/submit"
+          }
+        },
+        {
+          "name": "Get Carbon Result",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"\"\n}"
+            },
+            "url": "{{base_url}}/carbon/result"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Occasion",
+      "item": [
+        {
+          "name": "Occasion Type List",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/occasion/type-list"
+          }
+        },
+        {
+          "name": "Add Occasion Type",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "", "type": "text" },
+                { "key": "occasion_image", "type": "file" }
+              ]
+            },
+            "url": "{{base_url}}/occasion/type/add"
+          }
+        },
+        {
+          "name": "Submit Occasion",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"occasion_type\": \"\",\n  \"user_id\": \"\"\n}"
+            },
+            "url": "{{base_url}}/occasion/submit"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Plantation",
+      "item": [
+        {
+          "name": "Plant List",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/plant/list"
+          }
+        },
+        {
+          "name": "Add Plant",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plant_name\": \"\"\n}"
+            },
+            "url": "{{base_url}}/plant/add"
+          }
+        },
+        {
+          "name": "Location List",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/location/list"
+          }
+        },
+        {
+          "name": "Add Location",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"location_name\": \"\"\n}"
+            },
+            "url": "{{base_url}}/location/add"
+          }
+        },
+        {
+          "name": "Submit Plantation",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"\",\n  \"plant_id\": \"\",\n  \"location_id\": \"\",\n  \"trees\": 1\n}"
+            },
+            "url": "{{base_url}}/plantation/submit"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Certificate",
+      "item": [
+        {
+          "name": "Certificate Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"certificate_id\": \"\",\n  \"user_id\": \"\"\n}"
+            },
+            "url": "{{base_url}}/certificate/details"
+          }
+        },
+        {
+          "name": "Download Certificate",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"certificate_id\": \"\"\n}"
+            },
+            "url": "{{base_url}}/certificate/download"
+          }
+        },
+        {
+          "name": "Verify Certificate",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"qr_code\": \"\"\n}"
+            },
+            "url": "{{base_url}}/certificate/verify"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"\"\n}"
+            },
+            "url": "{{base_url}}/profile"
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"\",\n  \"name\": \"\",\n  \"email\": \"\"\n}"
+            },
+            "url": "{{base_url}}/profile/update"
+          }
+        },
+        {
+          "name": "Upload Profile Image",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "user_id", "value": "", "type": "text" },
+                { "key": "profile_image", "type": "file" }
+              ]
+            },
+            "url": "{{base_url}}/profile/upload-image"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Team",
+      "item": [
+        {
+          "name": "Team List",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/team/list"
+          }
+        },
+        {
+          "name": "Add Team",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "team_name", "value": "", "type": "text" },
+                { "key": "team_full_name", "value": "", "type": "text" },
+                { "key": "team_color", "value": "", "type": "text" },
+                { "key": "description", "value": "", "type": "text" },
+                { "key": "total_trees", "value": "0", "type": "text" },
+                { "key": "total_supporters", "value": "0", "type": "text" },
+                { "key": "team_logo", "type": "file" }
+              ]
+            },
+            "url": "{{base_url}}/team/add"
+          }
+        },
+        {
+          "name": "Update Team",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"team_name\": \"\",\n  \"team_full_name\": \"\",\n  \"team_color\": \"\",\n  \"description\": \"\",\n  \"total_trees\": 0,\n  \"total_supporters\": 0\n}"
+            },
+            "url": "{{base_url}}/team/update/:team_id"
+          }
+        },
+        {
+          "name": "Upload Team Image",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "team_id", "value": "", "type": "text" },
+                { "key": "team_logo", "type": "file" }
+              ]
+            },
+            "url": "{{base_url}}/team/upload-image"
+          }
+        },
+        {
+          "name": "Team Preplant Support",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"team_id\": \"\",\n  \"user_id\": \"\",\n  \"tree\": 1\n}"
+            },
+            "url": "{{base_url}}/team/preplant/support"
+          }
+        },
+        {
+          "name": "Team Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"team_id\": \"\"\n}"
+            },
+            "url": "{{base_url}}/team/details"
+          }
+        },
+        {
+          "name": "Team Challenge",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/team/challenge"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Match",
+      "item": [
+        {
+          "name": "Match List",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/match/list"
+          }
+        },
+        {
+          "name": "Add Match",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"team1_id\": \"\",\n  \"team2_id\": \"\",\n  \"match_date\": \"2026-01-21T18:30:00.000Z\",\n  \"match_time\": \"07:30\",\n  \"venue\": \"\",\n  \"match_type\": \"upcoming\",\n  \"team1_trees\": 0,\n  \"team2_trees\": 0\n}"
+            },
+            "url": "{{base_url}}/match/add"
+          }
+        },
+        {
+          "name": "Match Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"match_id\": \"\"\n}"
+            },
+            "url": "{{base_url}}/match/details"
+          }
+        },
+        {
+          "name": "Support Trees",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"\",\n  \"match_id\": \"\",\n  \"team_id\": \"\",\n  \"trees\": 1,\n  \"amount\": 0\n}"
+            },
+            "url": "{{base_url}}/support/trees"
+          }
+        }
+      ]
+    }
+  ]
+}

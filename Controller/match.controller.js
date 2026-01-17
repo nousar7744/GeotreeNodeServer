@@ -5,11 +5,6 @@ import Support from "../Models/support.model.js";
 // API: Get match list
 export const getMatchList = async (req, res) => {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
     const basePopulate = (query) => Match.find(query)
       .populate('team1_id', 'team_name team_logo')
       .populate('team2_id', 'team_name team_logo')
@@ -17,14 +12,9 @@ export const getMatchList = async (req, res) => {
       .sort({ match_date: 1 });
 
     const [todayMatches, previousMatches, upcomingMatches] = await Promise.all([
-      basePopulate({
-        $or: [
-          { status: 'live' },
-          { match_date: { $gte: today, $lt: tomorrow } }
-        ]
-      }),
-      basePopulate({ match_date: { $lt: today }, status: 'completed' }),
-      basePopulate({ match_date: { $gte: tomorrow }, status: 'upcoming' })
+      basePopulate({ status: 'live' }),
+      basePopulate({ status: 'completed' }),
+      basePopulate({ status: 'upcoming' })
     ]);
 
     return res.json({
@@ -49,7 +39,16 @@ export const getMatchList = async (req, res) => {
 // API: Add match
 export const addMatch = async (req, res) => {
   try {
-    const { team1_id, team2_id, match_date, match_time, venue,match_type} = req.body;
+    const {
+      team1_id,
+      team2_id,
+      match_date,
+      match_time,
+      venue,
+      match_type,
+      team1_trees,
+      team2_trees
+    } = req.body;
     
     if (!team1_id || !team2_id || !match_date) {
       return res.status(400).json({
@@ -95,8 +94,8 @@ export const addMatch = async (req, res) => {
       match_time: match_time || null,
       venue: venue || null,
       status: status,
-      team1_trees: 0,
-      team2_trees: 0
+      team1_trees: team1_trees !== undefined ? Number(team1_trees) : 0,
+      team2_trees: team2_trees !== undefined ? Number(team2_trees) : 0
     });
 
     const populatedMatch = await Match.findById(match._id)

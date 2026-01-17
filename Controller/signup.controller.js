@@ -47,7 +47,7 @@ export const checkNumber = async (req, res) => {
 
     // If mobile already exists, regenerate OTP and store in memory (don't update user yet)
     if (IsMobileExist) {
-      const otp = Math.floor(1000 + Math.random() * 9000);
+      const otp = Math.floor(100000 + Math.random() * 900000);
       
       // Store OTP in memory (will be verified in verifyOTP)
       // otpStorage.set(mobileNumber, {
@@ -85,7 +85,7 @@ export const checkNumber = async (req, res) => {
 
     // If device token is present and it's registered to a different user, just send OTP (store in memory)
     if (IsDeviceExist && IsDeviceExist.mobile !== mobileNumber && IsDeviceExist.mobile !== req.body.mobile) {
-      const otp = Math.floor(1000 + Math.random() * 9000);
+      const otp = Math.floor(100000 + Math.random() * 900000);
       
       // Store OTP in memory
       otpStorage.set(mobileNumber, {
@@ -113,7 +113,7 @@ export const checkNumber = async (req, res) => {
     }
 
     // For new users, generate OTP and store in memory (don't create user yet)
-    const otp = Math.floor(1000 + Math.random() * 9000);
+    const otp = Math.floor(100000 + Math.random() * 900000);
 
     // Store OTP in memory (will be verified in verifyOTP, then user will be created)
     otpStorage.set(mobileNumber, {

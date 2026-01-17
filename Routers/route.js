@@ -14,7 +14,12 @@ import {
   submitCarbon,
   getCarbonResult
 } from "../Controller/carbon.controller.js";
-import { getOccasionTypeList, submitOccasion } from "../Controller/occasion.controller.js";
+import {
+  getOccasionTypeList,
+  addOccasionType,
+  submitOccasion,
+  uploadOccasionImageMiddleware
+} from "../Controller/occasion.controller.js";
 import { submitPlantation, getPlantList, getLocationList, addPlant, addLocation } from "../Controller/plantation.controller.js";
 import {
   getCertificateDetails,
@@ -78,6 +83,7 @@ GeoRouter.post("/carbon/submit", submitCarbon);
 GeoRouter.get("/carbon/result", getCarbonResult);
 
 GeoRouter.get("/occasion/type-list", getOccasionTypeList);
+GeoRouter.post("/occasion/type/add", uploadOccasionImageMiddleware, addOccasionType);
 GeoRouter.post("/occasion/submit", submitOccasion);
 
 GeoRouter.get("/plant/list", getPlantList);
