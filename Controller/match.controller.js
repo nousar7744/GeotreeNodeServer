@@ -5,37 +5,36 @@ import Support from "../Models/support.model.js";
 // API: Get match list
 export const getMatchList = async (req, res) => {
   try {
-    const { type } = req.query; // today, previous, upcoming
-    
-    let query = {};
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    if (type === 'today') {
-      query.match_date = {
-        $gte: today,
-        $lt: tomorrow
-      };
-    } else if (type === 'previous') {
-      query.match_date = { $lt: today };
-      query.status = 'completed';
-    } else if (type === 'upcoming') {
-      query.match_date = { $gte: tomorrow };
-      query.status = 'upcoming';
-    }
-
-    const matches = await Match.find(query)
+    const basePopulate = (query) => Match.find(query)
       .populate('team1_id', 'team_name team_logo')
       .populate('team2_id', 'team_name team_logo')
       .populate('winner_team_id', 'team_name team_logo')
       .sort({ match_date: 1 });
 
+    const [todayMatches, previousMatches, upcomingMatches] = await Promise.all([
+      basePopulate({
+        $or: [
+          { status: 'live' },
+          { match_date: { $gte: today, $lt: tomorrow } }
+        ]
+      }),
+      basePopulate({ match_date: { $lt: today }, status: 'completed' }),
+      basePopulate({ match_date: { $gte: tomorrow }, status: 'upcoming' })
+    ]);
+
     return res.json({
       status: true,
       message: "Match list fetched",
-      data: matches
+      data: {
+        today: todayMatches,
+        previous: previousMatches,
+        upcoming: upcomingMatches
+      }
     });
   } catch (error) {
     console.error("Get Match List Error:", error);
@@ -77,13 +76,13 @@ export const addMatch = async (req, res) => {
     if (match_type) {
       if (match_type === 'previous' || match_type === 'completed') {
         status = 'completed';
-      } else if (match_type === 'today' || match_type === 'ongoing') {
-        status = 'today';
+      } else if (match_type === 'today' || match_type === 'ongoing' || match_type === 'live') {
+        status = 'live';
       } else if (match_type === 'upcoming' || match_type === 'future') {
         status = 'upcoming';
       } else {
         // If match_type is already a valid enum value, use it
-        if (['upcoming', 'today', 'completed'].includes(match_type)) {
+        if (['upcoming', 'live', 'completed'].includes(match_type)) {
           status = match_type;
         }
       }
@@ -122,7 +121,7 @@ export const addMatch = async (req, res) => {
 // API: Get match details
 export const getMatchDetails = async (req, res) => {
   try {
-    const { match_id } = req.query;
+    const { match_id } = req.body;
     
     if (!match_id) {
       return res.status(400).json({

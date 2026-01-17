@@ -61,10 +61,12 @@ GeoRouter.post("/auth/phonepe/create-payment", createPhonePePayment);
 GeoRouter.post("/phonepe/create-payment", createPhonePePayment); // Old format
 GeoRouter.post("/auth/phonepe/redirect", phonePeRedirect);
 GeoRouter.post("/auth/phonepe/callback", phonePeCallback);
+
 GeoRouter.get("/state/list", getStateList);
 GeoRouter.post("/state/add", uploadStateImageMiddleware, addState);
 GeoRouter.put("/state/update/:state_id", updateState);// API: Upload/Update state image
 GeoRouter.post("/state/upload-image", uploadStateImageMiddleware, uploadStateImage);
+
 GeoRouter.get("/category/list", getCategoryList);
 GeoRouter.post("/category/add", uploadCategoryImageMiddleware, addCategory);
 GeoRouter.get("/carbon/home-type-list", getHomeTypeList);
@@ -74,8 +76,10 @@ GeoRouter.get("/carbon/food-type-list", getFoodTypeList);
 GeoRouter.post("/carbon/add-all-types", addAllTypes);
 GeoRouter.post("/carbon/submit", submitCarbon);
 GeoRouter.get("/carbon/result", getCarbonResult);
+
 GeoRouter.get("/occasion/type-list", getOccasionTypeList);
 GeoRouter.post("/occasion/submit", submitOccasion);
+
 GeoRouter.get("/plant/list", getPlantList);
 GeoRouter.post("/plant/add", addPlant);
 GeoRouter.get("/location/list", getLocationList);
@@ -84,9 +88,11 @@ GeoRouter.post("/plantation/submit", submitPlantation);
 GeoRouter.get("/certificate/details", getCertificateDetails);
 GeoRouter.get("/certificate/download", downloadCertificate);
 GeoRouter.get("/certificate/verify", verifyCertificate);
+
 GeoRouter.get("/profile", getProfile);
 GeoRouter.put("/profile/update", updateProfile);
 GeoRouter.post("/profile/upload-image", uploadMiddleware, uploadProfileImage);
+
 GeoRouter.get("/team/list", getTeamList);
 GeoRouter.post("/team/add", uploadTeamLogoMiddleware, addTeam);
 GeoRouter.put("/team/update/:team_id", updateTeam);

@@ -5,7 +5,7 @@ import myUser from "../Models/user.model.js";
 // API 17: Get certificate details
 export const getCertificateDetails = async (req, res) => {
   try {
-    const { certificate_id, user_id } = req.query;
+    const { certificate_id, user_id } = req.body;
 
     let certificate;
     if (certificate_id) {
@@ -51,7 +51,7 @@ export const getCertificateDetails = async (req, res) => {
 // API 21: Download certificate (returns certificate data)
 export const downloadCertificate = async (req, res) => {
   try {
-    const { certificate_id } = req.query;
+    const { certificate_id } = req.body;
 
     if (!certificate_id) {
       return res.status(400).json({
@@ -91,7 +91,7 @@ export const downloadCertificate = async (req, res) => {
 // API 22: Verify certificate via QR
 export const verifyCertificate = async (req, res) => {
   try {
-    const { qr_code } = req.query;
+    const { qr_code } = req.body;
 
     if (!qr_code) {
       return res.status(400).json({

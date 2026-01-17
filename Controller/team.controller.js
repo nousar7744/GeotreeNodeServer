@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Team from "../Models/team.model.js";
 import Support from "../Models/support.model.js";
 import Match from "../Models/match.model.js";
@@ -65,7 +66,14 @@ export const getTeamList = async (req, res) => {
 // API: Add team
 export const addTeam = async (req, res) => {
   try {
-    const { team_name, description } = req.body;
+    const {
+      team_name,
+      description,
+      team_color,
+      team_full_name,
+      total_trees,
+      total_supporters
+    } = req.body;
     
     if (!team_name) {
       return res.status(400).json({
@@ -77,9 +85,11 @@ export const addTeam = async (req, res) => {
 
     const teamData = {
       team_name,
+      team_full_name: team_full_name || null,
       description: description || null,
-      total_trees: 0,
-      total_supporters: 0
+      team_color: team_color || null,
+      total_trees: total_trees !== undefined ? Number(total_trees) : 0,
+      total_supporters: total_supporters !== undefined ? Number(total_supporters) : 0
     };
 
     // Add team logo if file was uploaded (handle both req.file and req.files)
@@ -167,7 +177,7 @@ export const teamPreplantSupport = async (req, res) => {
 // API: Get team details
 export const getTeamDetails = async (req, res) => {
   try {
-    const { team_id } = req.query;
+    const { team_id } = req.body;
     
     if (!team_id) {
       return res.status(400).json({
@@ -210,13 +220,31 @@ export const getTeamDetails = async (req, res) => {
 // API: Update team
 export const updateTeam = async (req, res) => {
   try {
-    const { team_id } = req.params;
-    const { team_name, description } = req.body;
+    const rawTeamId = req.params.team_id || req.query.team_id;
+    const {
+      team_name,
+      description,
+      team_color,
+      team_full_name,
+      total_trees,
+      total_supporters
+    } = req.body;
     
+    const team_id = typeof rawTeamId === "string" && rawTeamId.startsWith("team_id=")
+      ? rawTeamId.slice("team_id=".length)
+      : rawTeamId;
+
     if (!team_id) {
       return res.status(400).json({
         status: false,
         message: "team_id is required",
+        data: {}
+      });
+    }
+    if (!mongoose.Types.ObjectId.isValid(team_id)) {
+      return res.status(400).json({
+        status: false,
+        message: "team_id is invalid",
         data: {}
       });
     }
@@ -227,6 +255,18 @@ export const updateTeam = async (req, res) => {
     }
     if (description !== undefined) {
       updateData.description = description;
+    }
+    if (team_color !== undefined) {
+      updateData.team_color = team_color;
+    }
+    if (team_full_name !== undefined) {
+      updateData.team_full_name = team_full_name;
+    }
+    if (total_trees !== undefined) {
+      updateData.total_trees = Number(total_trees);
+    }
+    if (total_supporters !== undefined) {
+      updateData.total_supporters = Number(total_supporters);
     }
 
     const team = await Team.findByIdAndUpdate(

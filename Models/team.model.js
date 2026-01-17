@@ -10,7 +10,15 @@ const TeamSchema = new mongoose.Schema({
     type: String,
     required: false
   },
+  team_full_name: {
+    type: String,
+    required: false
+  },
   description: {
+    type: String,
+    required: false
+  },
+  team_color: {
     type: String,
     required: false
   },

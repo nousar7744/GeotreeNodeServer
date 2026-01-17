@@ -44,7 +44,7 @@ export const uploadMiddleware = upload.single('profile_image');
 // API 18: Get profile
 export const getProfile = async (req, res) => {
   try {
-    const { user_id } = req.query;
+    const { user_id } = req.body;
 
     if (!user_id) {
       return res.status(400).json({

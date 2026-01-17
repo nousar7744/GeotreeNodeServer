@@ -179,7 +179,7 @@ export const submitCarbon = async (req, res) => {
 // API 11: Get carbon result
 export const getCarbonResult = async (req, res) => {
   try {
-    const { user_id } = req.query;
+    const { user_id } = req.body;
     if (!user_id) {
       return res.status(400).json({
         status: false,
