@@ -92,6 +92,7 @@ GeoRouter.post("/plant/add", addPlant);
 GeoRouter.get("/location/list", getLocationList);
 GeoRouter.post("/location/add", addLocation);
 GeoRouter.post("/plantation/submit", submitPlantation);
+
 GeoRouter.get("/certificate/details", getCertificateDetails);
 GeoRouter.get("/certificate/download", downloadCertificate);
 GeoRouter.get("/certificate/verify", verifyCertificate);

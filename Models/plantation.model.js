@@ -14,7 +14,12 @@ const PlantationSchema = new mongoose.Schema({
   name: String,
   date: Date,
   message: String,
-  location: String
+  location: String,
+  occasion_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "OccasionType",
+    required: false
+  }
 }, { timestamps: true });
 
 export default mongoose.model("Plantation", PlantationSchema);

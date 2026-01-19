@@ -105,7 +105,7 @@ export const addLocation = async (req, res) => {
 // API 16: Submit plantation details
 export const submitPlantation = async (req, res) => {
   try {
-    const { user_id, trees_count, plants, name, date, message, location } = req.body;
+    const { user_id, trees_count, plants, name, date, message, location, occasion_id } = req.body;
     
     if (!user_id) {
       return res.status(400).json({
@@ -145,8 +145,12 @@ export const submitPlantation = async (req, res) => {
       name,
       date: date ? new Date(date) : new Date(),
       message,
-      location
+      location,
+      occasion_id: occasion_id || null
     });
+
+    const populatedPlantation = await Plantation.findById(plantation._id)
+      .populate('occasion_id', 'name occasion_image');
 
     // Generate certificate
     const certificateId = `CERT-${Date.now()}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
@@ -163,7 +167,7 @@ export const submitPlantation = async (req, res) => {
       status: true,
       message: "Plantation submitted successfully",
       data: {
-        plantation,
+        plantation: populatedPlantation,
         certificate: {
           certificate_id: certificate.certificate_id,
           qr_code: certificate.qr_code
