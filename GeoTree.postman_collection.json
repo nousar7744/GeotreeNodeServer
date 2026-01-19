@@ -545,6 +545,20 @@
             "method": "GET",
             "url": "{{base_url}}/team/challenge"
           }
+        },
+        {
+          "name": "Team Challenge Create Support DB",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"team_name\": \"\",\n  \"total_dot_balls\": 0,\n  \"support_trees\": 0\n}"
+            },
+            "url": "{{base_url}}/team/challenge/create-support-db"
+          }
         }
       ]
     },

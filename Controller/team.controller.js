@@ -72,8 +72,11 @@ export const addTeam = async (req, res) => {
       team_color,
       team_full_name,
       total_trees,
-      total_supporters
+      total_supporters,
+      support_trees,
+      supportTrees
     } = req.body;
+    const totalDotBalls = req.body.total_dot_balls;
     
     if (!team_name) {
       return res.status(400).json({
@@ -89,7 +92,12 @@ export const addTeam = async (req, res) => {
       description: description || null,
       team_color: team_color || null,
       total_trees: total_trees !== undefined ? Number(total_trees) : 0,
-      total_supporters: total_supporters !== undefined ? Number(total_supporters) : 0
+      total_supporters: total_supporters !== undefined ? Number(total_supporters) : 0,
+      support_trees: support_trees !== undefined
+        ? Number(support_trees)
+        : supportTrees !== undefined
+          ? Number(supportTrees)
+          : 0
     };
 
     // Add team logo if file was uploaded (handle both req.file and req.files)
@@ -220,16 +228,23 @@ export const getTeamDetails = async (req, res) => {
 // API: Update team
 export const updateTeam = async (req, res) => {
   try {
-    const rawTeamId = req.params.team_id || req.query.team_id;
+    console.log("Request:", req);
+    console.log("Request Params:", req.params);
+    console.log("Request Query:", req.query);
+    const paramTeamId = req.params.team_id;
+    const queryTeamId = req.query.team_id;
+    const rawTeamId = paramTeamId && paramTeamId !== ":" ? paramTeamId : queryTeamId;
+    console.log("Raw Team ID:", rawTeamId);
+    console.log("Request Body:", req.body);
     const {
       team_name,
       description,
       team_color,
       team_full_name,
       total_trees,
-      total_supporters
+      total_supporters,
+      total_dot_balls
     } = req.body;
-    
     const team_id = typeof rawTeamId === "string" && rawTeamId.startsWith("team_id=")
       ? rawTeamId.slice("team_id=".length)
       : rawTeamId;
@@ -267,6 +282,14 @@ export const updateTeam = async (req, res) => {
     }
     if (total_supporters !== undefined) {
       updateData.total_supporters = Number(total_supporters);
+    }
+    if (req.body.support_trees !== undefined) {
+      updateData.support_trees = Number(req.body.support_trees);
+    } else if (req.body.supportTrees !== undefined) {
+      updateData.support_trees = Number(req.body.supportTrees);
+    }
+    if (total_dot_balls !== undefined) {
+      updateData.total_dot_balls = Number(total_dot_balls);
     }
 
     const team = await Team.findByIdAndUpdate(
@@ -423,6 +446,104 @@ export const teamChallenge = async (req, res) => {
     });
   } catch (error) {
     console.error("Team Challenge Error:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Server error",
+      data: {}
+    });
+  }
+};
+
+// API: Add/Update team challenge stats
+export const addTeamChallenge = async (req, res) => {
+  try {
+    const {
+      team_id,
+      team_name,
+      total_dot_balls,
+      support_trees,
+      supportTrees,
+      total_trees
+    } = req.body;
+
+    if (!team_id && !team_name) {
+      return res.status(400).json({
+        status: false,
+        message: "team_id or team_name is required",
+        data: {}
+      });
+    }
+
+    const updateData = {};
+    if (total_dot_balls !== undefined) {
+      updateData.total_dot_balls = Number(total_dot_balls);
+    }
+    if (support_trees !== undefined) {
+      updateData.support_trees = Number(support_trees);
+    } else if (supportTrees !== undefined) {
+      updateData.support_trees = Number(supportTrees);
+    }
+    if (total_trees !== undefined) {
+      updateData.total_trees = Number(total_trees);
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        status: false,
+        message: "total_dot_balls, support_trees, or total_trees is required",
+        data: {}
+      });
+    }
+
+    let team;
+    if (team_id) {
+      team = await Team.findByIdAndUpdate(team_id, updateData, {
+        new: true,
+        runValidators: true
+      });
+    } else {
+      team = await Team.findOneAndUpdate(
+        { team_name },
+        updateData,
+        {
+          new: true,
+          runValidators: true,
+          upsert: true,
+          setDefaultsOnInsert: true
+        }
+      );
+    }
+
+    if (!team) {
+      return res.status(404).json({
+        status: false,
+        message: "Team not found",
+        data: {}
+      });
+    }
+
+    // Return updated team challenge data (same shape as teamChallenge)
+    const teams = await Team.find().sort({ total_trees: -1 });
+    const totalMatches = await Match.countDocuments();
+    const totalSupports = await Support.countDocuments();
+    const totalTrees = await Support.aggregate([
+      { $group: { _id: null, total: { $sum: "$trees" } } }
+    ]);
+
+    return res.json({
+      status: true,
+      message: "Team challenge updated successfully",
+      data: {
+        teams: teams,
+        tournament_stats: {
+          total_matches: totalMatches,
+          total_supports: totalSupports,
+          total_trees: totalTrees[0]?.total || 0
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Add Team Challenge Error:", error);
     return res.status(500).json({
       status: false,
       message: "Server error",

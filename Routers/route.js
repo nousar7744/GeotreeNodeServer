@@ -40,6 +40,7 @@ import {
   teamPreplantSupport,
   getTeamDetails,
   teamChallenge,
+  addTeamChallenge,
   uploadTeamLogoMiddleware
 } from "../Controller/team.controller.js";
 import {
@@ -106,6 +107,7 @@ GeoRouter.post("/team/upload-image", uploadTeamLogoMiddleware, uploadTeamImage);
 GeoRouter.post("/team/preplant/support", teamPreplantSupport);
 GeoRouter.get("/team/details", getTeamDetails);
 GeoRouter.get("/team/challenge", teamChallenge);
+GeoRouter.post("/team/challenge/create-support-db", addTeamChallenge);
 GeoRouter.get("/match/list", getMatchList);
 GeoRouter.post("/match/add", addMatch);
 GeoRouter.get("/match/details", getMatchDetails);

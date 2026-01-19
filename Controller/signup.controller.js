@@ -49,19 +49,6 @@ export const checkNumber = async (req, res) => {
     if (IsMobileExist) {
       const otp = Math.floor(100000 + Math.random() * 900000);
       
-      // Store OTP in memory (will be verified in verifyOTP)
-      // otpStorage.set(mobileNumber, {
-      //   otp: otp,
-      //   device_token: req.body.device_token || null,
-      //   timestamp: Date.now(),
-      //   existingUser: true,
-      //   userId: IsMobileExist._id
-      // });
-      
-      // Clear OTP after 10 minutes
-      // setTimeout(() => {
-      //   otpStorage.delete(mobileNumber);
-      // }, 10 * 60 * 1000);  
       const UpdatedUser = await myUser.findByIdAndUpdate(
         IsMobileExist._id,
         {
@@ -106,6 +93,7 @@ export const checkNumber = async (req, res) => {
         message: 'OTP sent to mobile. Please verify OTP.',
         data: {
           mobile: mobileNumber,
+          number_verified: false,
           otp: otp,  // Return OTP for testing (remove in production)
           message: 'Device already registered with different mobile. Verify OTP to proceed.'
         }
@@ -136,6 +124,7 @@ export const checkNumber = async (req, res) => {
       message: 'OTP sent to mobile. Please verify OTP to complete registration.',
       data: {
         mobile: mobileNumber,
+        number_verified: false,
         otp: otp  // Return OTP for testing (remove in production)
       }
     });

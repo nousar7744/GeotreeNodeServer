@@ -61,7 +61,7 @@ export const addMatch = async (req, res) => {
     // Check if teams exist
     const team1 = await Team.findById(team1_id);
     const team2 = await Team.findById(team2_id);
-    
+    console.log(team1, team2);
     if (!team1 || !team2) {
       return res.status(404).json({
         status: false,
@@ -204,26 +204,29 @@ export const supportTrees = async (req, res) => {
       }
     }
 
+    const teamIdUsed = team_id || match.team1_id.toString();
+
     // Create support record
     const support = await Support.create({
       user_id,
       support_type: 'match',
       match_id,
-      team_id: team_id || match.team1_id,
+      team_id: teamIdUsed,
       trees: Number(trees),
       amount: amount ? Number(amount) : 0
     });
 
     // Update match trees count
-    if (team_id === match.team1_id.toString()) {
+    if (teamIdUsed === match.team1_id.toString()) {
       await Match.findByIdAndUpdate(match_id, {
         $inc: { team1_trees: Number(trees) }
       });
-    } else if (team_id === match.team2_id.toString()) {
+    } else if (teamIdUsed === match.team2_id.toString()) {
       await Match.findByIdAndUpdate(match_id, {
         $inc: { team2_trees: Number(trees) }
       });
     }
+
 
     return res.json({
       status: true,

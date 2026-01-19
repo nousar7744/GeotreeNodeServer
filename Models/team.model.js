@@ -29,6 +29,14 @@ const TeamSchema = new mongoose.Schema({
   total_supporters: {
     type: Number,
     default: 0
+  },
+  total_dot_balls: {
+    type: Number,
+    default: 0
+  },
+  support_trees: {
+    type: Number,
+    default: 0
   }
 }, { timestamps: true });
 
