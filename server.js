@@ -58,7 +58,7 @@ const startServer = async () => {
 
     const PORT = process.env.PORT || 5000;
     app.listen(PORT,'0.0.0.0', () => {
-      console.log(`🚀 Server running on PORT ${PORT}`);
+      console.log(`🚀 Server running on PORT==== ${PORT}`);
       console.log(`📍 Health check: http://localhost:${PORT}/`);
       console.log(`📍 API Health: http://localhost:${PORT}/api/health`);
       console.log(`📍 Test API: http://localhost:${PORT}/api/auth/check-number`);

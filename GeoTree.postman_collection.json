@@ -581,9 +581,23 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"team1_id\": \"\",\n  \"team2_id\": \"\",\n  \"match_date\": \"2026-01-21T18:30:00.000Z\",\n  \"match_time\": \"07:30\",\n  \"venue\": \"\",\n  \"match_type\": \"upcoming\",\n  \"team1_trees\": 0,\n  \"team2_trees\": 0\n}"
+              "raw": "{\n  \"team1_id\": \"\",\n  \"team2_id\": \"\",\n  \"match_date\": \"2026-01-21T18:30:00.000Z\",\n  \"match_time\": \"07:30\",\n  \"venue\": \"\",\n  \"match_type\": \"upcoming\",\n  \"team1_dotball\": 0,\n  \"team2_dotball\": 0,\n  \"match_dot_balls\": 0\n}"
             },
             "url": "{{base_url}}/match/add"
+          }
+        },
+        {
+          "name": "Update Match",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"team1_id\": \"\",\n  \"team2_id\": \"\",\n  \"match_date\": \"2026-01-21T18:30:00.000Z\",\n  \"match_time\": \"07:30\",\n  \"venue\": \"\",\n  \"match_type\": \"upcoming\",\n  \"status\": \"upcoming\",\n  \"team1_dotball\": 0,\n  \"team2_dotball\": 0,\n  \"match_dot_balls\": 0,\n  \"winner_team_id\": \"\"\n}"
+            },
+            "url": "{{base_url}}/match/update/:match_id"
           }
         },
         {
@@ -609,7 +623,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"user_id\": \"\",\n  \"match_id\": \"\",\n  \"team_id\": \"\",\n  \"trees\": 1,\n  \"amount\": 0\n}"
+              "raw": "{\n  \"user_id\": \"\",\n  \"match_id\": \"\",\n  \"team_id\": \"\",\n  \"dot_ball\": 1,\n  \"amount\": 0\n}"
             },
             "url": "{{base_url}}/support/trees"
           }

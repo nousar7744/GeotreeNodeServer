@@ -36,6 +36,18 @@ const MatchSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  team1_dotball: {
+    type: Number,
+    default: 0
+  },
+  team2_dotball: {
+    type: Number,
+    default: 0
+  },
+  match_dot_balls: {
+    type: Number,
+    default: 0
+  },
   winner_team_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Team",

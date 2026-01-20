@@ -48,10 +48,20 @@ export const uploadTeamLogoMiddleware = upload.any();
 export const getTeamList = async (req, res) => {
   try {
     const teams = await Team.find().sort({ team_name: 1 });
+    const teamsWithRemaining = teams.map((team) => {
+      const teamObj = team.toObject ? team.toObject() : team;
+      const totalDotBalls = Number(teamObj.total_dot_balls) || 0;
+      const totalTrees = Number(teamObj.total_trees) || 0;
+      const remainingDotBalls = Math.max(0, totalDotBalls - totalTrees);
+
+      return {
+        ...teamObj,
+      };
+    });
     return res.json({
       status: true,
       message: "Team list fetched",
-      data: teams
+      data: teamsWithRemaining
     });
   } catch (error) {
     console.error("Get Team List Error:", error);
@@ -133,7 +143,7 @@ export const addTeam = async (req, res) => {
 // API: Team preplant support
 export const teamPreplantSupport = async (req, res) => {
   try {
-    const { team_id, user_id, tree } = req.body;
+    const { team_id, user_id, tree, amount } = req.body;
     
     if (!team_id || !user_id || !tree) {
       return res.status(400).json({
@@ -159,12 +169,17 @@ export const teamPreplantSupport = async (req, res) => {
       support_type: 'team',
       team_id,
       trees: Number(tree),
-      amount: 0
+      amount: amount ? Number(amount) : 0
     });
 
-    // Update team total trees
+    // Update team totals (trees up, supporters up, dot balls down)
     await Team.findByIdAndUpdate(team_id, {
-      $inc: { total_trees: Number(tree), total_supporters: 1 }
+      $inc: {
+        total_trees: Number(tree),
+        total_supporters: 1,
+        total_amount: amount ? Number(amount) : 0,
+        total_dot_balls: -Number(tree)
+      }
     });
 
     return res.json({

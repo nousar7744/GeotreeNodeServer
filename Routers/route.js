@@ -47,6 +47,7 @@ import {
   getMatchList,
   addMatch,
   getMatchDetails,
+  updateMatch,
   supportTrees
 } from "../Controller/match.controller.js";
 
@@ -111,6 +112,8 @@ GeoRouter.get("/team/challenge", teamChallenge);
 GeoRouter.post("/team/challenge/create-support-db", addTeamChallenge);
 GeoRouter.get("/match/list", getMatchList);
 GeoRouter.post("/match/add", addMatch);
+GeoRouter.put("/match/update/:match_id", updateMatch);
+GeoRouter.put("/match/update", updateMatch);
 GeoRouter.get("/match/details", getMatchDetails);
 GeoRouter.post("/support/trees", supportTrees);
 
