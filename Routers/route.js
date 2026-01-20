@@ -2,6 +2,7 @@ import Express from "express";
 
 // Import all controllers
 import { checkNumber, verifyOTP } from "../Controller/signup.controller.js";
+import { verifyFirebaseUser } from "../Controller/firebase.controller.js";
 import { createPhonePePayment, phonePeRedirect, phonePeCallback } from "../Controller/payment.controller.js";
 import { getStateList, addState, updateState, uploadStateImage, uploadStateImageMiddleware } from "../Controller/state.controller.js";
 import { getCategoryList, addCategory, uploadCategoryImageMiddleware } from "../Controller/category.controller.js";
@@ -64,6 +65,7 @@ GeoRouter.get("/test", (req, res) => {
 
 GeoRouter.post("/auth/check-number", checkNumber);
 GeoRouter.post("/auth/verify-otp", verifyOTP);
+GeoRouter.post("/auth/firebase/verify", verifyFirebaseUser);
 GeoRouter.post("/auth/phonepe/create-payment", createPhonePePayment);
 GeoRouter.post("/phonepe/create-payment", createPhonePePayment); // Old format
 GeoRouter.post("/auth/phonepe/redirect", phonePeRedirect);
@@ -98,7 +100,7 @@ GeoRouter.get("/certificate/details", getCertificateDetails);
 GeoRouter.get("/certificate/download", downloadCertificate);
 GeoRouter.get("/certificate/verify", verifyCertificate);
 
-GeoRouter.get("/profile", getProfile);
+GeoRouter.post("/profile", getProfile);
 GeoRouter.put("/profile/update", updateProfile);
 GeoRouter.post("/profile/upload-image", uploadMiddleware, uploadProfileImage);
 

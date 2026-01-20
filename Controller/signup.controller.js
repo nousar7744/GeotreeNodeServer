@@ -142,6 +142,7 @@ export const checkNumber = async (req, res) => {
 export const verifyOTP = async (req, res) => {
   try {
     const { mobile, otp, privacy_policy, device_token } = req.body;
+    console.log('   verifyOTP - Request body:', req.body);
 
     if (!mobile || !otp) {
       return res.status(400).json({
@@ -159,7 +160,7 @@ export const verifyOTP = async (req, res) => {
 
     // Check OTP from in-memory storage
     const storedOtpData = otpStorage.get(mobileNumber);
-    
+    console.log('   verifyOTP - Stored OTP data:', storedOtpData);
     if (!storedOtpData) {
       return res.send({
         status: false,
