@@ -256,6 +256,20 @@
             },
             "url": "{{base_url}}/carbon/result"
           }
+        },
+        {
+          "name": "Get Carbon History",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"\"\n}"
+            },
+            "url": "{{base_url}}/carbon/history"
+          }
         }
       ]
     },
@@ -356,6 +370,20 @@
               "raw": "{\n  \"user_id\": \"\",\n  \"plant_id\": \"\",\n  \"location_id\": \"\",\n  \"trees\": 1\n}"
             },
             "url": "{{base_url}}/plantation/submit"
+          }
+        },
+        {
+          "name": "Plantation History",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"\"\n}"
+            },
+            "url": "{{base_url}}/plantation/history"
           }
         }
       ]
@@ -626,6 +654,20 @@
               "raw": "{\n  \"user_id\": \"\",\n  \"match_id\": \"\",\n  \"team_id\": \"\",\n  \"dot_ball\": 1,\n  \"amount\": 0\n}"
             },
             "url": "{{base_url}}/support/trees"
+          }
+        },
+        {
+          "name": "Dot Ball History",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"\"\n}"
+            },
+            "url": "{{base_url}}/dotball/history"
           }
         }
       ]

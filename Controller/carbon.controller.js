@@ -1,6 +1,113 @@
 import Carbon from "../Models/carbon.model.js";
 import { HomeType, TransportType, ElectricityType, FoodType } from "../Models/carbonTypes.model.js";
 
+const toNumber = (value) => {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : 0;
+};
+
+const defaultFactors = {
+  transport: {
+    car_diesel_km: 0.21,
+    car_petrol_km: 0.19,
+    motorbike_km: 0.1,
+    bus_km: 0.08,
+    train_km: 0.04,
+    flight_short_per_flight: 150,
+    flight_long_per_flight: 400
+  },
+  energy: {
+    electricity_kwh: 0.82,
+    lpg_kg: 2.98
+  },
+  waste: {
+    waste_kg: 0.5
+  },
+  food: {
+    meat_per_meal: 7
+  }
+};
+
+const normalizeInputs = (raw = {}) => ({
+  car_km_week: toNumber(raw.car_km_week),
+  car_fuel: raw.car_fuel || "petrol",
+  motorbike_km_week: toNumber(raw.motorbike_km_week),
+  bus_km_week: toNumber(raw.bus_km_week),
+  train_km_week: toNumber(raw.train_km_week),
+  flights_short: toNumber(raw.flights_short),
+  flights_long: toNumber(raw.flights_long),
+  electricity_kwh_month: toNumber(raw.electricity_kwh_month),
+  electricity_bill_annual: toNumber(raw.electricity_bill_annual),
+  lpg_kg_month: toNumber(raw.lpg_kg_month),
+  waste_kg_month: toNumber(raw.waste_kg_month),
+  meat_meals_week: toNumber(raw.meat_meals_week),
+  dairy_portions_week: toNumber(raw.dairy_portions_week),
+  shopping_freq_week: toNumber(raw.shopping_freq_week)
+});
+
+const calculateEmissions = (inputs, factors) => {
+  let total = 0;
+  const breakdown = {
+    transport: 0,
+    energy: 0,
+    food: 0,
+    waste: 0
+  };
+  const transport = factors.transport || {};
+  const energy = factors.energy || {};
+  const waste = factors.waste || {};
+  const food = factors.food || {};
+
+  if (inputs.car_km_week > 0) {
+    const perKm = inputs.car_fuel === "diesel"
+      ? transport.car_diesel_km || 0
+      : transport.car_petrol_km || 0;
+    breakdown.transport += inputs.car_km_week * 52 * perKm;
+  }
+  if (inputs.motorbike_km_week > 0) {
+    breakdown.transport += inputs.motorbike_km_week * 52 * (transport.motorbike_km || 0);
+  }
+  if (inputs.bus_km_week > 0) {
+    breakdown.transport += inputs.bus_km_week * 52 * (transport.bus_km || 0);
+  }
+  if (inputs.train_km_week > 0) {
+    breakdown.transport += inputs.train_km_week * 52 * (transport.train_km || 0);
+  }
+  if (inputs.flights_short > 0) {
+    breakdown.transport += inputs.flights_short * (transport.flight_short_per_flight || 0);
+  }
+  if (inputs.flights_long > 0) {
+    breakdown.transport += inputs.flights_long * (transport.flight_long_per_flight || 0);
+  }
+
+  if (inputs.electricity_kwh_month > 0) {
+    breakdown.energy += inputs.electricity_kwh_month * 12 * (energy.electricity_kwh || 0);
+  } else if (inputs.electricity_bill_annual > 0) {
+    const kwh = inputs.electricity_bill_annual / 8;
+    breakdown.energy += kwh * (energy.electricity_kwh || 0);
+  }
+  if (inputs.lpg_kg_month > 0) {
+    breakdown.energy += inputs.lpg_kg_month * 12 * (energy.lpg_kg || 0);
+  }
+
+  if (inputs.waste_kg_month > 0) {
+    breakdown.waste += inputs.waste_kg_month * 12 * (waste.waste_kg || 0);
+  }
+
+  if (inputs.meat_meals_week > 0) {
+    breakdown.food += inputs.meat_meals_week * 52 * (food.meat_per_meal || 0);
+  }
+  if (inputs.dairy_portions_week > 0) {
+    breakdown.food += inputs.dairy_portions_week * 52 * 2.5;
+  }
+  if (inputs.shopping_freq_week > 0) {
+    breakdown.food += inputs.shopping_freq_week * 52 * 10;
+  }
+
+  total = breakdown.transport + breakdown.energy + breakdown.food + breakdown.waste;
+  return { total, breakdown };
+};
+
 // API 6: Get home type list
 export const getHomeTypeList = async (req, res) => {
   try {
@@ -79,9 +186,12 @@ export const getFoodTypeList = async (req, res) => {
 
 // API 10: Submit carbon footprint data
 export const submitCarbon = async (req, res) => {
+  console.log(req.body,'req.body====>');
   try {
-    const { user_id, home_type, transport_type, electricity_type, food_type } = req.body;
-    
+    const payload = req.body || {};
+    console.log(payload,'req.payload====>');
+
+    const { user_id, home_type, transport_type, electricity_type, food_type } = payload;
     if (!user_id) {
       return res.status(400).json({
         status: false,
@@ -90,67 +200,47 @@ export const submitCarbon = async (req, res) => {
       });
     }
 
-    // Calculate carbon result based on selected types
-    let carbonResult = 0;
-    
-    // Carbon footprint values (in kg CO2 per month)
-    const carbonFootprint = {
-      // Home types (approximate monthly carbon footprint)
-      home: {
-        apartment: 200,
-        house: 300,
-        villa: 500,
-        studio: 150
-      },
-      // Transport types (approximate monthly carbon footprint)
-      transport: {
-        car: 400,
-        bike: 50,
-        public_transport: 100,
-        walking: 0,
-        cycling: 0
-      },
-      // Electricity types (approximate monthly carbon footprint)
-      electricity: {
-        low: 150,      // 0-100 units/month
-        medium: 300,   // 100-300 units/month
-        high: 600      // 300+ units/month
-      },
-      // Food types (approximate monthly carbon footprint)
-      food: {
-        vegetarian: 100,
-        non_vegetarian: 200,
-        vegan: 80
-      }
-    };
+    const inputsPayload = payload.inputs;
+    const hasInputs = inputsPayload || Object.prototype.hasOwnProperty.call(payload, "car_km_week");
+    if (hasInputs) {
+      const factors = payload.factors || defaultFactors;
+      const inputs = normalizeInputs(inputsPayload || payload);
+      const { total, breakdown } = calculateEmissions(inputs, factors);
+      const totalTonnes = total / 1000;
+      const breakdownPercent = {
+        transport: total ? (breakdown.transport / total) * 100 : 0,
+        energy: total ? (breakdown.energy / total) * 100 : 0,
+        food: total ? (breakdown.food / total) * 100 : 0,
+        waste: total ? (breakdown.waste / total) * 100 : 0
+      };
 
-    // Calculate based on selected types
-    if (home_type) {
-      const homeValue = carbonFootprint.home[home_type] || 0; // Default to apartment
-      console.log("homeValue", homeValue);
-      carbonResult += homeValue;
+
+      const carbon = await Carbon.create({
+        user_id,
+        breakdownPercent,
+       
+        carbon_result: totalTonnes
+      });
+      console.log(carbon,'carbon====>')
+
+      return res.json({
+        status: true,
+        message: "Carbon data submitted successfully",
+        data: {
+          user_id: payload.user_id,
+          carbon,
+          total,
+          total_tonnes: totalTonnes,
+          breakdown,
+          breakdown_percent: breakdownPercent
+        }
+      });
     }
 
-    if (transport_type) {
-      const transportValue = carbonFootprint.transport[transport_type] || 0; // Default
-      console.log("transportValue", transportValue);
-      carbonResult += transportValue;
-    }
-
-    if (electricity_type) {
-      const electricityValue = carbonFootprint.electricity[electricity_type] || 0; // Default
-      console.log("electricityValue", electricityValue);
-      carbonResult += electricityValue;
-    }
-
-    if (food_type) {
-      const foodValue = carbonFootprint.food[food_type] || 0; // Default
-      console.log("foodValue", foodValue);
-      carbonResult += foodValue;
-    }
-    
-    // Round to 2 decimal places
-    carbonResult = Math.round(carbonResult * 100) / 100;
+    const carbonResult = toNumber(home_type)
+      + toNumber(transport_type)
+      + toNumber(electricity_type)
+      + toNumber(food_type);
 
     const carbon = await Carbon.create({
       user_id,
@@ -158,7 +248,7 @@ export const submitCarbon = async (req, res) => {
       transport_type,
       electricity_type,
       food_type,
-      carbon_result: carbonResult
+      carbon_result: Math.round(carbonResult * 100) / 100
     });
 
     return res.json({
@@ -179,7 +269,8 @@ export const submitCarbon = async (req, res) => {
 // API 11: Get carbon result
 export const getCarbonResult = async (req, res) => {
   try {
-    const { user_id } = req.body;
+    const payload = req.body || {};
+    const user_id = payload.user_id || req.query?.user_id;
     if (!user_id) {
       return res.status(400).json({
         status: false,
@@ -204,6 +295,36 @@ export const getCarbonResult = async (req, res) => {
     });
   } catch (error) {
     console.error("Get Carbon Result Error:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Server error",
+      data: {}
+    });
+  }
+};
+
+// API: Get carbon history by user
+export const getCarbonHistory = async (req, res) => {
+  try {
+    const { user_id } = req.body;
+
+    if (!user_id) {
+      return res.status(400).json({
+        status: false,
+        message: "user_id is required",
+        data: {}
+      });
+    }
+
+    const history = await Carbon.find({ user_id }).sort({ createdAt: -1 });
+
+    return res.json({
+      status: true,
+      message: "Carbon history fetched",
+      data: history
+    });
+  } catch (error) {
+    console.error("Get Carbon History Error:", error);
     return res.status(500).json({
       status: false,
       message: "Server error",

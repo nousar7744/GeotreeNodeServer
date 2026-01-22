@@ -33,7 +33,8 @@ export const getMatchList = async (req, res) => {
       basePopulate({ status: 'completed' }),
       basePopulate({ status: 'upcoming' })
     ]);
-    
+
+
 
     return res.json({
       status: true,
@@ -66,9 +67,8 @@ export const addMatch = async (req, res) => {
       match_type,
       team1_dotball,
       team2_dotball,
-      match_dot_balls
     } = req.body;
-    
+
     if (!team1_id || !team2_id || !match_date) {
       return res.status(400).json({
         status: false,
@@ -76,6 +76,18 @@ export const addMatch = async (req, res) => {
         data: {}
       });
     }
+    const dotBallLimit = 40;
+    const isInvalidDotBallValue = (value) =>
+      value !== undefined && (Number.isNaN(Number(value)) || Number(value) >= dotBallLimit);
+    if (isInvalidDotBallValue(team1_dotball) || isInvalidDotBallValue(team2_dotball)) {
+      return res.status(400).json({
+        status: false,
+        message: `team1 dot ball and team2 dot ball must be numeric values less than ${dotBallLimit}`,
+        data: {}
+      });
+    }
+
+
 
     // Check if teams exist
     const team1 = await Team.findById(team1_id);
@@ -106,6 +118,16 @@ export const addMatch = async (req, res) => {
       }
     }
 
+    const isNonZeroDotBall = (value) =>
+      value !== undefined && Number(value) !== 0;
+    if (status === "upcoming" && (isNonZeroDotBall(team1_dotball) || isNonZeroDotBall(team2_dotball))) {
+      return res.status(400).json({
+        status: false,
+        message: "dotball values must be 0 when match type is upcoming",
+        data: {}
+      });
+    }
+
     const parsedMatchDate = parseMatchDate(match_date);
     if (!parsedMatchDate || Number.isNaN(parsedMatchDate.getTime())) {
       return res.status(400).json({
@@ -124,7 +146,7 @@ export const addMatch = async (req, res) => {
       status: status,
       team1_dotball: team1_dotball !== undefined ? Number(team1_dotball) : 0,
       team2_dotball: team2_dotball !== undefined ? Number(team2_dotball) : 0,
-      match_dot_balls: match_dot_balls !== undefined ? Number(match_dot_balls) : 0
+      match_dot_balls: team2_dotball !== undefined && team1_dotball !== undefined ? Number(team2_dotball) + Number(team1_dotball) : 0
     });
 
     const populatedMatch = await Match.findById(match._id)
@@ -148,7 +170,7 @@ export const addMatch = async (req, res) => {
 
 // API: Update match
 export const updateMatch = async (req, res) => {
-  console.log(req.body,'req.body====>'); 
+  console.log(req.body, 'req.body====>');
   try {
     const matchIdFromParams = req.params.match_id;
     const matchIdFromBody = req.body.match_id;
@@ -235,6 +257,30 @@ export const updateMatch = async (req, res) => {
     if (match_time !== undefined) updateData.match_time = match_time;
     if (venue !== undefined) updateData.venue = venue;
     if (nextStatus !== undefined) updateData.status = nextStatus;
+    const dotBallLimit = 20;
+    const isInvalidDotBallValue = (value) =>
+      value !== undefined && (Number.isNaN(Number(value)) || Number(value) >= dotBallLimit);
+    if (isInvalidDotBallValue(team1_dotball) || isInvalidDotBallValue(team2_dotball)) {
+      return res.status(400).json({
+        status: false,
+        message: `team1_dotball and team2_dotball must be numeric values less than ${dotBallLimit}`,
+        data: {}
+      });
+    }
+    const isNonZeroDotBall = (value) =>
+      value !== undefined && Number(value) !== 0;
+    if (
+      nextStatus === "upcoming" &&
+      (isNonZeroDotBall(team1_dotball) ||
+        isNonZeroDotBall(team2_dotball) ||
+        isNonZeroDotBall(match_dot_balls))
+    ) {
+      return res.status(400).json({
+        status: false,
+        message: "dotball values must be 0 when match type is upcoming",
+        data: {}
+      });
+    }
     if (team1_dotball !== undefined) updateData.team1_dotball = Number(team1_dotball);
     if (team2_dotball !== undefined) updateData.team2_dotball = Number(team2_dotball);
     if (match_dot_balls !== undefined) updateData.match_dot_balls = Number(match_dot_balls);
@@ -283,7 +329,7 @@ export const updateMatch = async (req, res) => {
 export const getMatchDetails = async (req, res) => {
   try {
     const { match_id } = req.body;
-    
+
     if (!match_id) {
       return res.status(400).json({
         status: false,
@@ -336,7 +382,7 @@ export const getMatchDetails = async (req, res) => {
 export const supportTrees = async (req, res) => {
   try {
     const { user_id, match_id, dot_ball, amount, team_id } = req.body;
-    
+
     if (!user_id || !match_id || !dot_ball) {
       return res.status(400).json({
         status: false,
@@ -356,35 +402,36 @@ export const supportTrees = async (req, res) => {
     }
 
     // Validate team_id is one of the match teams
+    // if (team_id) {
+    //   if (match.team1_id.toString() !== team_id && match.team2_id.toString() !== team_id) {
+    //     return res.status(400).json({
+    //       status: false,
+    //       message: "team_id must be one of the match teams",
+    //       data: {}
+    //     });
+    //   }
+    // }
+
+    const team1Trees = match.team1_dotball || 0;
+    const team2Trees = match.team2_dotball || 0;
+
+    const largerTeam =
+      team1Trees > team2Trees ? "team1" :
+        team2Trees > team1Trees ? "team2" : "equal";
+
+    const smallerTeam =
+      team1Trees < team2Trees ? "team1" :
+        team2Trees < team1Trees ? "team2" : "equal";
+    console.log(team_id, 'team_id====>');
+
+    let teamIdUsed = null;
     if (team_id) {
-      if (match.team1_id.toString() !== team_id && match.team2_id.toString() !== team_id) {
-        return res.status(400).json({
-          status: false,
-          message: "team_id must be one of the match teams",
-          data: {}
-        });
-      }
-    }
-    const team1Trees = match.team1_trees || 0;
-const team2Trees = match.team2_trees || 0;
-
-const largerTeam =
-  team1Trees > team2Trees ? "team1" :
-  team2Trees > team1Trees ? "team2" : "equal";
-
-const smallerTeam =
-  team1Trees < team2Trees ? "team1" :
-  team2Trees < team1Trees ? "team2" : "equal";
-   console.log(team_id,'team_id====>');
-      
-    let teamIdUsed =null;
-    if(team_id){
       teamIdUsed = team_id;
-    }else{
+    } else {
       teamIdUsed = largerTeam === "team1" ? match.team1_id.toString() : match.team2_id.toString();
     }
     // Create support record
-    console.log(teamIdUsed,'teamIdUsed====>');
+    console.log(teamIdUsed, 'teamIdUsed====>');
     const support = await Support.create({
       user_id,
       support_type: 'match',
@@ -399,12 +446,13 @@ const smallerTeam =
       match_dot_balls: -Number(dot_ball)
     };
     if (teamIdUsed === match.team1_id.toString()) {
-      incUpdate.team1_trees = -Number(dot_ball);
+      incUpdate.team1_dotball = -Number(dot_ball);
     } else if (teamIdUsed === match.team2_id.toString()) {
-      incUpdate.team2_trees = -Number(dot_ball);
+      incUpdate.team2_dotball = -Number(dot_ball);
     }
-    
+
     await Match.findByIdAndUpdate(match_id, { $inc: incUpdate });
+    console.log(incUpdate, 'incUpdate====>');
 
     return res.json({
       status: true,
@@ -413,6 +461,39 @@ const smallerTeam =
     });
   } catch (error) {
     console.error("Support Trees Error:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Server error",
+      data: {}
+    });
+  }
+};
+
+// API: Dot ball history by user (match supports)
+export const getDotBallHistory = async (req, res) => {
+  try {
+    const { user_id } = req.body;
+
+    if (!user_id) {
+      return res.status(400).json({
+        status: false,
+        message: "user_id is required",
+        data: {}
+      });
+    }
+
+    const history = await Support.find({ user_id, support_type: "match" })
+      .populate("match_id", "team1_id team2_id match_date match_time venue status match_dot_balls")
+      .populate("team_id", "team_name team_logo")
+      .sort({ createdAt: -1 });
+
+    return res.json({
+      status: true,
+      message: "Dot ball history fetched",
+      data: history
+    });
+  } catch (error) {
+    console.error("Get Dot Ball History Error:", error);
     return res.status(500).json({
       status: false,
       message: "Server error",

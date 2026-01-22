@@ -13,7 +13,8 @@ import {
   getFoodTypeList,
   addAllTypes,
   submitCarbon,
-  getCarbonResult
+  getCarbonResult,
+  getCarbonHistory
 } from "../Controller/carbon.controller.js";
 import {
   getOccasionTypeList,
@@ -21,7 +22,14 @@ import {
   submitOccasion,
   uploadOccasionImageMiddleware
 } from "../Controller/occasion.controller.js";
-import { submitPlantation, getPlantList, getLocationList, addPlant, addLocation } from "../Controller/plantation.controller.js";
+import {
+  submitPlantation,
+  getPlantList,
+  getLocationList,
+  addPlant,
+  addLocation,
+  getPlantationHistory
+} from "../Controller/plantation.controller.js";
 import {
   getCertificateDetails,
   downloadCertificate,
@@ -49,7 +57,8 @@ import {
   addMatch,
   getMatchDetails,
   updateMatch,
-  supportTrees
+  supportTrees,
+  getDotBallHistory
 } from "../Controller/match.controller.js";
 
 const GeoRouter = Express.Router();
@@ -85,6 +94,8 @@ GeoRouter.get("/carbon/food-type-list", getFoodTypeList);
 GeoRouter.post("/carbon/add-all-types", addAllTypes);
 GeoRouter.post("/carbon/submit", submitCarbon);
 GeoRouter.get("/carbon/result", getCarbonResult);
+GeoRouter.post("/carbon/result", getCarbonResult);
+GeoRouter.post("/carbon/history", getCarbonHistory);
 
 GeoRouter.get("/occasion/type-list", getOccasionTypeList);
 GeoRouter.post("/occasion/type/add", uploadOccasionImageMiddleware, addOccasionType);
@@ -95,6 +106,7 @@ GeoRouter.post("/plant/add", addPlant);
 GeoRouter.get("/location/list", getLocationList);
 GeoRouter.post("/location/add", addLocation);
 GeoRouter.post("/plantation/submit", submitPlantation);
+GeoRouter.post("/plantation/history", getPlantationHistory);
 
 GeoRouter.get("/certificate/details", getCertificateDetails);
 GeoRouter.get("/certificate/download", downloadCertificate);
@@ -118,6 +130,7 @@ GeoRouter.put("/match/update/:match_id", updateMatch);
 GeoRouter.put("/match/update", updateMatch);
 GeoRouter.get("/match/details", getMatchDetails);
 GeoRouter.post("/support/trees", supportTrees);
+GeoRouter.post("/dotball/history", getDotBallHistory);
 
 export { GeoRouter };
 

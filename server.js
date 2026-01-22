@@ -56,7 +56,7 @@ const startServer = async () => {
       });
     });
 
-    const PORT = process.env.PORT || 5000;
+    const PORT = process.env.PORT;
     app.listen(PORT,'0.0.0.0', () => {
       console.log(`🚀 Server running on PORT==== ${PORT}`);
       console.log(`📍 Health check: http://localhost:${PORT}/`);

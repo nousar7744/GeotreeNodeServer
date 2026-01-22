@@ -129,6 +129,7 @@ export const updateProfile = async (req, res) => {
 // API 20: Upload profile image
 export const uploadProfileImage = async (req, res) => {
   try {
+    console.log("📥 Upload Profile Image:", req.body);
     const { user_id } = req.body;
 
     if (!user_id) {
@@ -139,16 +140,17 @@ export const uploadProfileImage = async (req, res) => {
       });
     }
 
-    if (!req.file) {
+    const uploadedFile = req.file || (req.files && req.files[0]);
+    if (!uploadedFile) {
       return res.status(400).json({
         status: false,
-        message: "Profile image is required",
+        message: "Profile image file is required",
         data: {}
       });
     }
 
     // Construct image URL (adjust based on your server setup)
-    const imageUrl = `${req.protocol}://${req.get('host')}/uploads/profile/${req.file.filename}`;
+    const imageUrl = `${req.protocol}://${req.get('host')}/uploads/profile/${uploadedFile.filename}`;
 
     const user = await myUser.findByIdAndUpdate(
       user_id,
@@ -157,6 +159,10 @@ export const uploadProfileImage = async (req, res) => {
     );
 
     if (!user) {
+      const filePath = path.join(__dirname, "../uploads/profile", uploadedFile.filename);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
       return res.json({
         status: false,
         message: "User not found",

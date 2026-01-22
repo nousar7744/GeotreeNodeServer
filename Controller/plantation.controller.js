@@ -184,3 +184,34 @@ export const submitPlantation = async (req, res) => {
   }
 };
 
+// API: Get plantation history by user
+export const getPlantationHistory = async (req, res) => {
+  try {
+    const { user_id } = req.body;
+
+    if (!user_id) {
+      return res.status(400).json({
+        status: false,
+        message: "user_id is required",
+        data: {}
+      });
+    }
+
+    const plantations = await Plantation.find({ user_id })
+      .populate("occasion_id", "name occasion_image")
+      .sort({ createdAt: -1 });
+
+    return res.json({
+      status: true,
+      message: "Plantation history fetched",
+      data: plantations
+    });
+  } catch (error) {
+    console.error("Get Plantation History Error:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Server error",
+      data: {}
+    });
+  }
+};
