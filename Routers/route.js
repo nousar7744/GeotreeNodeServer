@@ -118,7 +118,6 @@ GeoRouter.put("/profile/update", updateProfile);
 GeoRouter.post("/profile/upload-image", uploadMiddleware, uploadProfileImage);
 GeoRouter.post("/tournament/add", addTournament);
 GeoRouter.get("/tournament", getTournaments);
-GeoRouter.post("/tournament/update/:tournament_id", updateTournament);
 GeoRouter.put("/tournament/update/:tournament_id", updateTournament);
 GeoRouter.put("/tournament/update", updateTournament);
 GeoRouter.get("/team/list", getTeamList);
