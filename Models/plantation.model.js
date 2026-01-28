@@ -15,6 +15,8 @@ const PlantationSchema = new mongoose.Schema({
   date: Date,
   message: String,
   location: String,
+  lat: Number,
+  lng: Number,
   occasion_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "OccasionType",

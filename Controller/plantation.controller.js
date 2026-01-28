@@ -2,7 +2,10 @@ import Plantation from "../Models/plantation.model.js";
 import Certificate from "../Models/certificate.model.js";
 import Plant from "../Models/plant.model.js";
 import Location from "../Models/location.model.js";
+import Carbon from "../Models/carbon.model.js";
 import crypto from "crypto";
+
+const CARBON_OFFSET_KG_PER_TREE = 20;
 
 // API 14: Get plant name list
 export const getPlantList = async (req, res) => {
@@ -56,7 +59,7 @@ export const addPlant = async (req, res) => {
 // API 15: Get location list
 export const getLocationList = async (req, res) => {
   try {
-    const locations = await Location.find().sort({ location_name: 1 });
+    const locations = await Location.find().sort({ location_name: 1 , lat: 1, lng: 1});
     return res.json({
       status: true,
       message: "Location list fetched",
@@ -75,7 +78,7 @@ export const getLocationList = async (req, res) => {
 // API: Add location
 export const addLocation = async (req, res) => {
   try {
-    const { location_name } = req.body;
+    const { location_name, lat, lng } = req.body;
     
     if (!location_name) {
       return res.status(400).json({
@@ -85,7 +88,24 @@ export const addLocation = async (req, res) => {
       });
     }
 
-    const location = await Location.create({ location_name });
+    const latitude = lat !== undefined ? Number(lat) : undefined;
+    const longitude = lng !== undefined ? Number(lng) : undefined;
+    if (
+      (lat !== undefined && Number.isNaN(latitude)) ||
+      (lng !== undefined && Number.isNaN(longitude))
+    ) {
+      return res.status(400).json({
+        status: false,
+        message: "lat and lng must be numeric values",
+        data: {}
+      });
+    }
+
+    const location = await Location.create({
+      location_name,
+      lat: latitude,
+      lng: longitude
+    });
     
     return res.json({
       status: true,
@@ -105,7 +125,7 @@ export const addLocation = async (req, res) => {
 // API 16: Submit plantation details
 export const submitPlantation = async (req, res) => {
   try {
-    const { user_id, trees_count, plants, name, date, message, location, occasion_id } = req.body;
+    const { user_id, trees_count, plants, name, date, message, location, occasion_id, lat, lng } = req.body;
     
     if (!user_id) {
       return res.status(400).json({
@@ -138,6 +158,19 @@ export const submitPlantation = async (req, res) => {
       });
     }
 
+    const latitude = lat !== undefined ? Number(lat) : undefined;
+    const longitude = lng !== undefined ? Number(lng) : undefined;
+    if (
+      (lat !== undefined && Number.isNaN(latitude)) ||
+      (lng !== undefined && Number.isNaN(longitude))
+    ) {
+      return res.status(400).json({
+        status: false,
+        message: "lat and lng must be numeric values",
+        data: {}
+      });
+    }
+
     const plantation = await Plantation.create({
       user_id,
       trees_count,
@@ -146,6 +179,8 @@ export const submitPlantation = async (req, res) => {
       date: date ? new Date(date) : new Date(),
       message,
       location,
+      lat: latitude,
+      lng: longitude,
       occasion_id: occasion_id || null
     });
 
@@ -201,10 +236,33 @@ export const getPlantationHistory = async (req, res) => {
       .populate("occasion_id", "name occasion_image")
       .sort({ createdAt: -1 });
 
+    const totalTreesCount = plantations.reduce((sum, plantation) => {
+      const plantationData = plantation.toObject();
+      const plantCountFromList = Array.isArray(plantationData.plants)
+        ? plantationData.plants.reduce((pSum, item) => pSum + (Number(item.quantity) || 0), 0)
+        : 0;
+      const plantCount = Number(plantationData.trees_count) || plantCountFromList;
+      return sum + plantCount;
+    }, 0);
+
+    const carbon = await Carbon.findOne({ user_id }).sort({ createdAt: -1 });
+    let carbonSummary = null;
+    if (carbon) {
+      const carbonData = carbon.toObject();
+      const total = carbonData.total ?? carbonData.carbon_result ?? 0;
+      const totalTonnes = carbonData.total_tonnes ?? (total ? total / 1000 : 0);
+      carbonSummary = {
+        total,
+        total_tonnes: totalTonnes,
+      };
+    }
+
     return res.json({
       status: true,
       message: "Plantation history fetched",
-      data: plantations
+      data: plantations,
+      total_trees_count: totalTreesCount,
+      carbon: carbonSummary
     });
   } catch (error) {
     console.error("Get Plantation History Error:", error);
