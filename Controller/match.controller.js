@@ -481,11 +481,18 @@ export const getDotBallHistory = async (req, res) => {
         data: {}
       });
     }
-
-    const history = await Support.find({ user_id, support_type: "match" })
-      .populate("match_id", "team1_id team2_id match_date match_time venue status match_dot_balls")
-      .populate("team_id", "team_name team_logo")
-      .sort({ createdAt: -1 });
+   //team and match support_type
+  const history = await Support.find({user_id,support_type: { $in: ["team", "match"] },})
+.populate({
+    path: "match_id",
+    select: "match_date match_time venue status match_dot_balls",
+    populate: [
+      { path: "team1_id", select: "team_name team_logo" },
+      { path: "team2_id", select: "team_name team_logo" },
+    ],
+  })
+  .populate("team_id", "team_name team_logo")
+  .sort({ createdAt: -1 });
 
     return res.json({
       status: true,

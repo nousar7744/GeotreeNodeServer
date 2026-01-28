@@ -60,6 +60,7 @@ import {
   supportTrees,
   getDotBallHistory
 } from "../Controller/match.controller.js";
+import { addTournament, getTournaments, updateTournament } from "../Controller/tournament.controller.js";
 
 const GeoRouter = Express.Router();
 
@@ -115,7 +116,11 @@ GeoRouter.get("/certificate/verify", verifyCertificate);
 GeoRouter.post("/profile", getProfile);
 GeoRouter.put("/profile/update", updateProfile);
 GeoRouter.post("/profile/upload-image", uploadMiddleware, uploadProfileImage);
-
+GeoRouter.post("/tournament/add", addTournament);
+GeoRouter.get("/tournament", getTournaments);
+GeoRouter.post("/tournament/update/:tournament_id", updateTournament);
+GeoRouter.put("/tournament/update/:tournament_id", updateTournament);
+GeoRouter.put("/tournament/update", updateTournament);
 GeoRouter.get("/team/list", getTeamList);
 GeoRouter.post("/team/add", uploadTeamLogoMiddleware, addTeam);
 GeoRouter.put("/team/update/:team_id", updateTeam);

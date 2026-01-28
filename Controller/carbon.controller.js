@@ -28,6 +28,87 @@ const defaultFactors = {
   }
 };
 
+const speciesMixConfig = {
+  neem: { ids: ["neem"], percent: 0.25 },
+  peepal: { ids: ["peepal"], percent: 0.25 },
+  mango: { ids: ["mango"], percent: 0.25 },
+  banyan: { ids: ["banyan"], percent: 0.25 }
+};
+
+const speciesList = [
+  {
+    id: "neem",
+    name: "Neem",
+    sequestration_kg_per_year: 20,
+    type: "Native, multipurpose",
+    note: "Resilient, supports soil"
+  },
+  {
+    id: "peepal",
+    name: "Peepal",
+    sequestration_kg_per_year: 28,
+    type: "Long-lived hardwood",
+    note: "High long-term sequestration"
+  },
+  {
+    id: "mango",
+    name: "Mango",
+    sequestration_kg_per_year: 22,
+    type: "Fruit-bearing",
+    note: "Long-term sink and livelihood benefits"
+  },
+  {
+    id: "banyan",
+    name: "Banyan",
+    sequestration_kg_per_year: 30,
+    type: "Sacred, shade",
+    note: "Large canopy, excellent for carbon"
+  }
+];
+
+const recommendSpecies = (totalTonnes, list, config = speciesMixConfig) => {
+  const totalKg = totalTonnes * 1000;
+  const neemKg = totalKg * config.neem.percent;
+  const peepalKg = totalKg * config.peepal.percent;
+  const mangoKg = totalKg * config.mango.percent;
+  const banyanKg = totalKg * config.banyan.percent;
+
+  const result = [];
+  config.neem.ids.forEach((id) => {
+    const s = list.find((sp) => sp.id === id);
+    if (s) {
+      let count = Math.ceil(neemKg / s.sequestration_kg_per_year);
+      if (count < 1) count = 1;
+      result.push({ ...s, count, rationale: "Native, multipurpose" });
+    }
+  });
+  config.peepal.ids.forEach((id) => {
+    const s = list.find((sp) => sp.id === id);
+    if (s) {
+      let count = Math.ceil(peepalKg / s.sequestration_kg_per_year);
+      if (count < 1) count = 1;
+      result.push({ ...s, count, rationale: "Long-lived, high sequestration" });
+    }
+  });
+  config.mango.ids.forEach((id) => {
+    const s = list.find((sp) => sp.id === id);
+    if (s) {
+      let count = Math.ceil(mangoKg / s.sequestration_kg_per_year);
+      if (count < 1) count = 1;
+      result.push({ ...s, count, rationale: "Fruit-bearing, long-term" });
+    }
+  });
+  config.banyan.ids.forEach((id) => {
+    const s = list.find((sp) => sp.id === id);
+    if (s) {
+      let count = Math.ceil(banyanKg / s.sequestration_kg_per_year);
+      if (count < 1) count = 1;
+      result.push({ ...s, count, rationale: "Sacred, large canopy" });
+    }
+  });
+  return result;
+};
+
 const normalizeInputs = (raw = {}) => ({
   car_km_week: toNumber(raw.car_km_week),
   car_fuel: raw.car_fuel || "petrol",
@@ -186,10 +267,8 @@ export const getFoodTypeList = async (req, res) => {
 
 // API 10: Submit carbon footprint data
 export const submitCarbon = async (req, res) => {
-  console.log(req.body,'req.body====>');
   try {
     const payload = req.body || {};
-    console.log(payload,'req.payload====>');
 
     const { user_id, home_type, transport_type, electricity_type, food_type } = payload;
     if (!user_id) {
@@ -213,15 +292,17 @@ export const submitCarbon = async (req, res) => {
         food: total ? (breakdown.food / total) * 100 : 0,
         waste: total ? (breakdown.waste / total) * 100 : 0
       };
-
+      const speciesRec = recommendSpecies(totalTonnes, speciesList, speciesMixConfig);
 
       const carbon = await Carbon.create({
         user_id,
-        breakdownPercent,
-       
-        carbon_result: totalTonnes
+        carbon_result: total,
+        total,
+        total_tonnes: totalTonnes,
+        breakdown,
+        breakdown_percent: breakdownPercent,
+        species_recommendations: speciesRec
       });
-      console.log(carbon,'carbon====>')
 
       return res.json({
         status: true,
@@ -232,7 +313,8 @@ export const submitCarbon = async (req, res) => {
           total,
           total_tonnes: totalTonnes,
           breakdown,
-          breakdown_percent: breakdownPercent
+          breakdown_percent: breakdownPercent,
+          species_recommendations: speciesRec
         }
       });
     }
@@ -288,10 +370,21 @@ export const getCarbonResult = async (req, res) => {
       });
     }
 
+    const carbonData = carbon.toObject();
+    const total = carbonData.total ?? carbonData.carbon_result ?? 0;
+    const totalTonnes = carbonData.total_tonnes ?? (total ? total / 1000 : 0);
+
     return res.json({
       status: true,
       message: "Carbon result fetched",
-      data: carbon
+      data: {
+        ...carbonData,
+        total,
+        total_tonnes: totalTonnes,
+        breakdown: carbonData.breakdown || {},
+        breakdown_percent: carbonData.breakdown_percent || {},
+        species_recommendations: carbonData.species_recommendations || []
+      }
     });
   } catch (error) {
     console.error("Get Carbon Result Error:", error);

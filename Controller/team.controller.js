@@ -278,7 +278,17 @@ export const updateTeam = async (req, res) => {
         data: {}
       });
     }
-
+    console.log(Number(total_dot_balls));
+    console.log(typeof total_dot_balls);
+    console.log(Number.isInteger(Number(total_dot_balls)));
+    console.log(Number(total_dot_balls)>50);
+    if(Number.isInteger(Number(total_dot_balls)) && Number(total_dot_balls)>50) {
+      return res.status(400).json({
+        status: false,
+        message: "total_dot_balls cannot be greater than 50",
+        data: {}
+      });
+    }
     const updateData = {};
     if (team_name) {
       updateData.team_name = team_name;
@@ -365,6 +375,7 @@ export const uploadTeamImage = async (req, res) => {
         data: {}
       });
     }
+   
 
     if (!uploadedFile) {
       return res.status(400).json({
